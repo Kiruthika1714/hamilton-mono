@@ -1,0 +1,1 @@
+class VehicleService { public static void main(String[] args) { System.out.println("Vehicle service running..."); int totalVehicles = 25; System.out.println("Available vehicles: " + totalVehicles); System.out.println("Service check complete."); } } 
