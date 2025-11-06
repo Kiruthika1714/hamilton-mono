@@ -46,7 +46,7 @@ jobs:
           node server.js
 
   package:
-    needs: [build-java, build-python, build-js]
+    needs: [Vechicle-build-java, build-python, build-js]
     runs-on: ubuntu-latest
     steps:
       - name: Combine Artefacts
