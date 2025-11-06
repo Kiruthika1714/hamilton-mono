@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-java:
+  Vechicle-build-java:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
