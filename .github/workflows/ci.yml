@@ -21,7 +21,7 @@ jobs:
           javac VehicleService.java
           java VehicleService
 
-  build-python:
+  Driver-build-python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
           cd driver-service
           python app.py
 
-  build-js:
+  Billing-build-js:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +46,7 @@ jobs:
           node server.js
 
   package:
-    needs: [Vechicle-build-java, build-python, build-js]
+    needs: [Vechicle-build-java, Driver-build-python, Billing-build-js]
     runs-on: ubuntu-latest
     steps:
       - name: Combine Artefacts
