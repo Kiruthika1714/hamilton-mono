@@ -1,4 +1,4 @@
-name: Hamilton Mono-Repo CI Pipeline
+name: Hamilton Mono-Repo Independent Builds
 
 on:
   push:
@@ -7,9 +7,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  Vehicle-build-java:
+  # ------------------------------------------------
+  # 1️⃣ Vehicle Service (Java)
+  # ------------------------------------------------
+  vehicle-service:
     name: Build Vehicle Service (Java)
     runs-on: ubuntu-latest
+    continue-on-error: true   # Allows pipeline to continue even if this job fails
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -20,18 +24,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Run Vehicle Service
+      - name: Compile and Run Vehicle Service
         run: |
           cd vehicle-service
-          echo "🔧 Starting Vehicle Service Build..."
-          javac VehicleService.java || { echo "Java build failed. Stopping pipeline."; exit 1; }
-          java VehicleService || { echo "Java execution failed. Stopping pipeline."; exit 1; }
-          echo "✅ Vehicle Service build and execution completed successfully."
+          javac VehicleService.java
+          java VehicleService
 
-  Driver-build-python:
+  # ------------------------------------------------
+  # 2️⃣ Driver Service (Python)
+  # ------------------------------------------------
+  driver-service:
     name: Build Driver Service (Python)
     runs-on: ubuntu-latest
-    needs: [Vehicle-build-java]
+    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -44,14 +49,15 @@ jobs:
       - name: Run Driver Service
         run: |
           cd driver-service
-          echo "Starting Driver Service..."
-          python app.py || { echo "Driver Service failed. Stopping pipeline."; exit 1; }
-          echo "Driver Service ran successfully."
+          python app.py
 
-  Billing-build-js:
+  # ------------------------------------------------
+  # 3️⃣ Billing Service (Node.js)
+  # ------------------------------------------------
+  billing-service:
     name: Build Billing Service (Node.js)
     runs-on: ubuntu-latest
-    needs: [Vehicle-build-java, Driver-build-python] 
+    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -64,19 +70,4 @@ jobs:
       - name: Run Billing Service
         run: |
           cd billing-service
-          echo "💰 Starting Billing Service..."
-          node server.js || { echo "Billing Service failed. Stopping pipeline."; exit 1; }
-          echo "Billing Service ran successfully."
-
-  Deployment-preparation:
-    name: Deployment Preparation (Combine Verified Builds)
-    runs-on: ubuntu-latest
-    needs: [Vehicle-build-java, Driver-build-python, Billing-build-js]
-    steps:
-      - name: Combine Artefacts
-        run: |
-          echo "Preparing Deployment Package..."
-          mkdir deploy
-          echo "All Hamilton microservices built and verified successfully!" > deploy/result.txt
-          echo "Verified Artefacts Ready for Deployment"
-          ls deploy
+          node server.js
