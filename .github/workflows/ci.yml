@@ -1,4 +1,4 @@
-name: Hamilton Mono-Repo Independent Builds
+name: Hamilton Mono-Repo Independent Test Builds
 
 on:
   push:
@@ -11,9 +11,9 @@ jobs:
   # 1️⃣ Vehicle Service (Java)
   # ------------------------------------------------
   vehicle-service:
-    name: Build Vehicle Service (Java)
+    name: Test Vehicle Service (Java)
     runs-on: ubuntu-latest
-    continue-on-error: true   # Allows pipeline to continue even if this job fails
+    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -24,17 +24,31 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Compile and Run Vehicle Service
+      - name: Compile and Run Tests
         run: |
           cd vehicle-service
+          set +e
+          echo "Running Vehicle Service tests..." > ../vehicle_test_results.txt
           javac VehicleService.java
-          java VehicleService
+          java VehicleService >> ../vehicle_test_results.txt 2>&1
+          if [ $? -eq 0 ]; then
+            echo "✅ Vehicle Service tests passed successfully!" >> ../vehicle_test_results.txt
+          else
+            echo "❌ Vehicle Service tests failed!" >> ../vehicle_test_results.txt
+          fi
+          cd ..
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: vehicle-test-results
+          path: vehicle_test_results.txt
 
   # ------------------------------------------------
   # 2️⃣ Driver Service (Python)
   # ------------------------------------------------
   driver-service:
-    name: Build Driver Service (Python)
+    name: Test Driver Service (Python)
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -46,16 +60,30 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Run Driver Service
+      - name: Run Python Tests
         run: |
           cd driver-service
-          python app.py
+          set +e
+          echo "Running Driver Service tests..." > ../driver_test_results.txt
+          python app.py >> ../driver_test_results.txt 2>&1
+          if [ $? -eq 0 ]; then
+            echo "✅ Driver Service tests passed successfully!" >> ../driver_test_results.txt
+          else
+            echo "❌ Driver Service tests failed!" >> ../driver_test_results.txt
+          fi
+          cd ..
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: driver-test-results
+          path: driver_test_results.txt
 
   # ------------------------------------------------
   # 3️⃣ Billing Service (Node.js)
   # ------------------------------------------------
   billing-service:
-    name: Build Billing Service (Node.js)
+    name: Test Billing Service (Node.js)
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -67,7 +95,21 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Run Billing Service
+      - name: Run Node.js Tests
         run: |
           cd billing-service
-          node server.js
+          set +e
+          echo "Running Billing Service tests..." > ../billing_test_results.txt
+          node server.js >> ../billing_test_results.txt 2>&1
+          if [ $? -eq 0 ]; then
+            echo "✅ Billing Service tests passed successfully!" >> ../billing_test_results.txt
+          else
+            echo "❌ Billing Service tests failed!" >> ../billing_test_results.txt
+          fi
+          cd ..
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: billing-test-results
+          path: billing_test_results.txt
